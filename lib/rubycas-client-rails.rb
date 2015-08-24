@@ -44,7 +44,7 @@ module RubyCAS
         
         ### patch this line to recreate the 2 items from cookie 
         last_st = controller.session[:cas_last_valid_ticket]
-	last_st_service = controller.session[:cas_last_valid_ticket_service]
+        last_st_service = controller.session[:cas_last_valid_ticket_service]
         
         if single_sign_out(controller)
           controller.send(:render, :text => "CAS Single-Sign-Out request intercepted.")
@@ -53,7 +53,16 @@ module RubyCAS
 
         st = read_ticket(controller)
         
-       # is_new_session = true
+        # is_new_session = true
+        if config.timeout
+          if controller.session[:previous_redirect_to_cas] && controller.session[:previous_redirect_to_cas] < (Time.now - (config.timeout).seconds)
+            last_st = st = false
+            is_new_session = true
+            log.warn "Existing ticket but it's been idle for too long"
+          else
+            controller.session[:previous_redirect_to_cas] = Time.now
+          end
+        end
         
         if st && last_st && 
             last_st == st.ticket && 
@@ -108,7 +117,7 @@ module RubyCAS
             # Store the ticket in the session to avoid re-validating the same service
             # ticket with the CAS server.
             controller.session[:cas_last_valid_ticket] = st.ticket
-	    controller.session[:cas_last_valid_ticket_service] = st.service
+            controller.session[:cas_last_valid_ticket_service] = st.service
             
             if st.pgt_iou
               unless controller.session[:cas_pgt] && controller.session[:cas_pgt].ticket && controller.session[:cas_pgt].iou == st.pgt_iou
