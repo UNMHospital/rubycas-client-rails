@@ -36,6 +36,8 @@ the client to log its actions to the default Rails logger using:
 
     config.rubycas.logger = Rails.logger
 
+    config.rubycas.idle_timeout = 1800 # reauthorize with CAS sever after this many idle seconds
+
 See the (outdated) documentation at [http://rubycas-client.rubyforge.org/](http://rubycas-client.rubyforge.org/)
 for a full list of config options.
 

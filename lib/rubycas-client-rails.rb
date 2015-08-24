@@ -54,8 +54,8 @@ module RubyCAS
         st = read_ticket(controller)
         
         # is_new_session = true
-        if config.timeout
-          if controller.session[:previous_redirect_to_cas] && controller.session[:previous_redirect_to_cas] < (Time.now - (config.timeout).seconds)
+        if config.idle_timeout
+          if controller.session[:previous_redirect_to_cas] && controller.session[:previous_redirect_to_cas] < (Time.now - (config.idle_timeout).seconds)
             last_st = st = false
             is_new_session = true
             log.warn "Existing ticket but it's been idle for too long"
